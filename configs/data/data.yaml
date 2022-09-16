@@ -1,9 +1,9 @@
 data:
-  data_root: null
+  data_root: ./xj3segment
   image_folder: images
   mask_folder: masks
   batch_size: 4
-  num_workers: 8
+  num_workers: 4
   pin_memory: true
   split_portion:
   - 0.7

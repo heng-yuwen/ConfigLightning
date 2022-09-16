@@ -1,6 +1,7 @@
 import os.path
 
 from PIL import Image
+import numpy as np
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
 from glob import glob
@@ -35,12 +36,11 @@ class XJ3SegmentDataModule(LightningDataModule):
         # called on every process in DDP
         self.image_path = os.path.join(self.data_root, self.image_folder)
         self.mask_path = os.path.join(self.data_root, self.mask_folder)
-        files_all = glob(os.path.join(self.image_path, "*.jpg"))
-        train_files, valid_files, test_files = random_split(files_all, self.split_portion,
-                                                            generator=torch.Generator().manual_seed(42))
-        self.train_files = [os.path.basename(file)[:-4] for file in train_files]
-        self.valid_files = [os.path.basename(file)[:-4] for file in valid_files]
-        self.test_files = [os.path.basename(file)[:-4] for file in test_files]
+        files_all = [os.path.basename(file)[:-4] for file in glob(os.path.join(self.image_path, "*.jpg"))]
+        self.split_portion = [int(len(files_all) * portion) for portion in self.split_portion]
+        self.split_portion[-1] += len(files_all) - sum(self.split_portion)
+        self.train_files, self.valid_files, self.test_files = random_split(files_all, self.split_portion,
+                                                                           generator=torch.Generator().manual_seed(42))
 
     def train_dataloader(self):
         train_split = XJ3SegmentDataset(self.train_files, self.data_root, self.image_folder, self.mask_folder)
@@ -85,12 +85,12 @@ class XJ3SegmentDataset(Dataset):
         self.mask_folder = mask_folder
 
     def __getitem__(self, index):
-        img_path = os.path.join(self.data_root, self.image_files[index] + ".jpg")
-        mask_path = os.path.join(self.data_root, self.image_files[index] + ".png")
+        img_path = os.path.join(self.data_root, self.image_folder, self.image_files[index] + ".jpg")
+        mask_path = os.path.join(self.data_root, self.mask_folder, self.image_files[index] + ".png")
         img = Image.open(img_path).convert('RGB')
         mask = Image.open(mask_path)
 
-        return torch.from_numpy(img).float(), torch.from_numpy(mask).float()
+        return torch.from_numpy(np.array(img)).float(), torch.from_numpy(np.array(mask)).float()
 
     def __len__(self):
         return len(self.image_files)

@@ -7,10 +7,10 @@ import torchmetrics
 
 
 class SparseSemanticSegmentor(pl.LightningModule):
-    def __init__(self, **kwargs):
+    def __init__(self, parameters: dict):
         super().__init__()
-        self.model = models.get_models(**kwargs)
-        self.loss = losses.FocalLoss("multiclass", ignore_index=kwargs["ignore_index"])
+        self.loss = losses.FocalLoss("multiclass", ignore_index=parameters.pop("ignore_index"))
+        self.model = models.get_models(**parameters)
         self.train_acc = torchmetrics.Accuracy()
         self.valid_acc = torchmetrics.Accuracy()
         self.test_acc = torchmetrics.Accuracy()

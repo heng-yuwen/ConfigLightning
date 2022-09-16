@@ -1,7 +1,8 @@
 model:
-  init_args:
+  parameters:
     encoder_name: resnet34
     encoder_weights: imagenet
     decoder_name: Unet
     in_channels: 3
+    ignore_index: 255
     classes: 13 # one more to cope with the unknown
