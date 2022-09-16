@@ -1,0 +1,11 @@
+data:
+  data_root: null
+  image_folder: images
+  mask_folder: masks
+  batch_size: 4
+  num_workers: 8
+  pin_memory: true
+  split_portion:
+  - 0.7
+  - 0.15
+  - 0.15
