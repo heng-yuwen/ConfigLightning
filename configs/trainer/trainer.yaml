@@ -1,5 +1,6 @@
 # pytorch_lightning==1.7.6
 seed_everything: true
+ckpt_path: null
 trainer:
   logger: true
   enable_checkpointing: true

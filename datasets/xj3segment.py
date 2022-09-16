@@ -64,6 +64,19 @@ class XJ3SegmentDataModule(LightningDataModule):
 
 
 class XJ3SegmentDataset(Dataset):
+    CLASSES = ["车道线-鱼骨线",
+               "车道线-普通车道线",
+               "车道线-横向斑马线",
+               "车道线-单线停止线",
+               "车道线-停车让行线",
+               "车道线-虚减速让行线",
+               "车道线-分段停止线",
+               "路沿-凸起马路牙子",
+               "路沿-交通警戒标识",
+               "路沿-道路围栏",
+               "减速带-凸起减速带",
+               "减速带-道路中画线"]
+
     def __init__(self, image_files, data_root, image_folder="images", mask_folder="masks"):
         super().__init__()
         self.image_files = image_files

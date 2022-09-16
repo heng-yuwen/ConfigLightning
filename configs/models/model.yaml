@@ -1,2 +1,7 @@
 model:
-  test: null
+  init_args:
+    encoder_name: resnet34
+    encoder_weights: imagenet
+    decoder_name: Unet
+    in_channels: 3
+    classes: 13 # one more to cope with the unknown
