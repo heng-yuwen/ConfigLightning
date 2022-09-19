@@ -1,7 +1,10 @@
 import os.path
 
 from PIL import Image
-import numpy as np
+from torchvision.transforms import Compose
+from customise_pl.transforms import CommonCompose
+from customise_pl.transforms import segment_transforms
+from torchvision import transforms
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
 from glob import glob
@@ -10,7 +13,19 @@ import torch
 
 class XJ3SegmentDataModule(LightningDataModule):
     def __init__(self, data_root, image_folder="images", mask_folder="masks", batch_size=4, num_workers=8,
-                 pin_memory=True, split_portion=(0.7, 0.15, 0.15)):
+                 pin_memory=True, split_portion=(0.7, 0.15, 0.15),
+                 train_image_transform=(transforms.ToTensor(),
+                                        transforms.Normalize(mean=torch.Tensor([124 / 255., 117 / 255., 104 / 255.]),
+                                                             std=torch.Tensor([1, 1, 1]))),
+                 train_common_transform=(segment_transforms.SegmentCenterCrop((1280, 720)),
+                                         segment_transforms.SegmentRandomHorizontalFlip()),
+                 valid_image_transform=None,
+                 valid_common_transfor=None,
+                 test_image_transform=(transforms.ToTensor(),
+                                       transforms.Normalize(mean=torch.Tensor([124 / 255., 117 / 255., 104 / 255.]),
+                                                            std=torch.Tensor([1, 1, 1]))),
+                 test_common_transform=(segment_transforms.SegmentCenterCrop((1280, 720)),
+                                        segment_transforms.SegmentRandomHorizontalFlip())):
         super().__init__()
         self.train_files = None
         self.test_files = None
@@ -25,6 +40,15 @@ class XJ3SegmentDataModule(LightningDataModule):
         self.num_workers = num_workers
         self.pin_memory = pin_memory
         self.split_portion = split_portion
+        self.train_image_transform = Compose(train_image_transform)
+        self.train_common_transform = CommonCompose(train_common_transform)
+        self.test_image_transform = Compose(test_image_transform)
+        self.test_common_transform = CommonCompose(test_common_transform)
+
+        if valid_image_transform is None:
+            self.valid_image_transform = Compose(test_image_transform)
+        if valid_common_transfor is None:
+            self.valid_common_transfor = CommonCompose(test_common_transform)
 
     def prepare_data(self):
         # download, split, etc...
@@ -32,7 +56,7 @@ class XJ3SegmentDataModule(LightningDataModule):
         pass
 
     def setup(self, stage):
-        # make assignments here ``'fit'``, ``'validate'``, ``'test'``, or ``'predict'``, include transform and dataset
+        # make assignments here ``'fit'``, ``'validate'``, ``'test'``, or ``'predict'``, include transforms and dataset
         # called on every process in DDP
         self.image_path = os.path.join(self.data_root, self.image_folder)
         self.mask_path = os.path.join(self.data_root, self.mask_folder)
@@ -43,17 +67,23 @@ class XJ3SegmentDataModule(LightningDataModule):
                                                                            generator=torch.Generator().manual_seed(42))
 
     def train_dataloader(self):
-        train_split = XJ3SegmentDataset(self.train_files, self.data_root, self.image_folder, self.mask_folder)
+        train_split = XJ3SegmentDataset(self.train_files, self.data_root, self.image_folder, self.mask_folder,
+                                        image_transform=self.train_image_transform,
+                                        common_transform=self.train_common_transform)
         return DataLoader(train_split, batch_size=self.batch_size, num_workers=self.num_workers,
                           pin_memory=self.pin_memory)
 
     def val_dataloader(self):
-        val_split = XJ3SegmentDataset(self.valid_files, self.data_root, self.image_folder, self.mask_folder)
+        val_split = XJ3SegmentDataset(self.valid_files, self.data_root, self.image_folder, self.mask_folder,
+                                      image_transform=self.valid_image_transform,
+                                      common_transform=self.valid_common_transfor)
         return DataLoader(val_split, batch_size=self.batch_size, num_workers=self.num_workers,
                           pin_memory=self.pin_memory)
 
     def test_dataloader(self):
-        test_split = XJ3SegmentDataset(self.test_files, self.data_root, self.image_folder, self.mask_folder)
+        test_split = XJ3SegmentDataset(self.test_files, self.data_root, self.image_folder, self.mask_folder,
+                                       image_transform=self.test_image_transform,
+                                       common_transform=self.test_common_transform)
         return DataLoader(test_split, batch_size=self.batch_size, num_workers=self.num_workers,
                           pin_memory=self.pin_memory)
 
@@ -77,20 +107,27 @@ class XJ3SegmentDataset(Dataset):
                "减速带-凸起减速带",
                "减速带-道路中画线"]
 
-    def __init__(self, image_files, data_root, image_folder="images", mask_folder="masks"):
+    def __init__(self, image_files, data_root, image_folder="images", mask_folder="masks", image_transform=None,
+                 common_transform=None):
         super().__init__()
         self.image_files = image_files
         self.data_root = data_root
         self.image_folder = image_folder
         self.mask_folder = mask_folder
+        self.image_transform = image_transform
+        self.common_transform = common_transform
 
     def __getitem__(self, index):
         img_path = os.path.join(self.data_root, self.image_folder, self.image_files[index] + ".jpg")
         mask_path = os.path.join(self.data_root, self.mask_folder, self.image_files[index] + ".png")
-        img = Image.open(img_path).convert('RGB')
+        image = Image.open(img_path).convert('RGB')
         mask = Image.open(mask_path)
 
-        return torch.from_numpy(np.array(img)).float(), torch.from_numpy(np.array(mask)).float()
+        if self.image_transform is not None:
+            image = self.image_transform(image)
+        if self.common_transform is not None:
+            image, mask = self.common_transform(image, mask)
+        return image, mask
 
     def __len__(self):
         return len(self.image_files)

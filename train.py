@@ -9,7 +9,7 @@ if __name__ == "__main__":
     parser = pl.Trainer.add_argparse_args(parser)
 
     # figure out which experiment, dataset to use
-    parser.add_argument("--experiment_name", type=str, default="SparseSemanticSegmentor", help="SparseSemanticSegmentor"
+    parser.add_argument("--experiment_name", type=str, default="SemanticSegmentor", help="SparseSemanticSegmentor"
                                                                                                " by default")
     parser.add_argument("--dataset_name", type=str, default="XJ3SegmentDataModule", help="XJ3Segment by default")
 
@@ -17,4 +17,4 @@ if __name__ == "__main__":
     args, _ = parser.parse_known_args()
     experiment = experiments.get_experiment(args.experiment_name)
     dataset = datasets.get_dataset(args.dataset_name)
-    LightningCLI(experiment, dataset)
+    LightningCLI(experiment, dataset, auto_registry=True)

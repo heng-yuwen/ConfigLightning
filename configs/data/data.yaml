@@ -3,7 +3,7 @@ data:
   image_folder: images
   mask_folder: masks
   batch_size: 4
-  num_workers: 4
+  num_workers: 8
   pin_memory: true
   split_portion:
   - 0.7

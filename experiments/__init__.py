@@ -1,6 +1,6 @@
-from .sparse_semantic_segmentation import SparseSemanticSegmentor
+from .semantic_segmentation import SemanticSegmentor
 
-__all__ = {"SparseSemanticSegmentor": SparseSemanticSegmentor}
+__all__ = {"SemanticSegmentor": SemanticSegmentor}
 
 
 def get_experiment(experiment_name):

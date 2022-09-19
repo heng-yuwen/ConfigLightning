@@ -6,7 +6,7 @@ import torch
 import torchmetrics
 
 
-class SparseSemanticSegmentor(pl.LightningModule):
+class SemanticSegmentor(pl.LightningModule):
     def __init__(self, parameters: dict):
         super().__init__()
         self.loss = losses.FocalLoss("multiclass", ignore_index=parameters.pop("ignore_index"))
