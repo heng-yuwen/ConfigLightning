@@ -40,7 +40,7 @@ class SemanticSegmentor(pl.LightningModule):
         self.log("train_loss", outputs["loss"])
         self.log("train_acc", accuracy, prog_bar=True)
 
-    def training_epoch_end(self, outputs):
+    def on_training_epoch_end(self):
         epoch_confmat = self.train_confmat.compute()
         self.train_confmat.reset()
         accuracy = self.segment_evaluator(epoch_confmat)
@@ -59,7 +59,7 @@ class SemanticSegmentor(pl.LightningModule):
         self.log("valid_loss", outputs["loss"])
         self.log("valid_acc", accuracy, prog_bar=True)
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self):
         epoch_confmat = self.valid_confmat.compute()
         self.valid_confmat.reset()
         accuracy = self.segment_evaluator(epoch_confmat)
@@ -78,7 +78,7 @@ class SemanticSegmentor(pl.LightningModule):
         self.log("test_loss", outputs["loss"])
         self.log("test_acc", accuracy, prog_bar=True)
 
-    def test_epoch_end(self, outputs):
+    def on_test_epoch_end(self):
         epoch_confmat = self.test_confmat.compute()
         self.test_confmat.reset()
         accuracy = self.segment_evaluator(epoch_confmat)
