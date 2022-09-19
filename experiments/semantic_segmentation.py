@@ -3,7 +3,6 @@ import segmentation_models_pytorch.losses as losses
 import models
 import torch
 import torchmetrics
-
 from customise_pl.metrics import SegmentEvaluator
 
 
