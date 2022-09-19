@@ -56,8 +56,12 @@ class XJ3SegmentDataModule(LightningDataModule):
         files_all = [os.path.basename(file)[:-4] for file in glob(os.path.join(self.image_path, "*.jpg"))]
         self.split_portion = [int(len(files_all) * portion) for portion in self.split_portion]
         self.split_portion[-1] += len(files_all) - sum(self.split_portion)
-        self.train_files, self.valid_files, self.test_files = random_split(files_all, self.split_portion,
-                                                                           generator=torch.Generator().manual_seed(42))
+        splited_sets = random_split(files_all, self.split_portion,
+                                     generator=torch.Generator().manual_seed(42))
+        if len(splited_sets) == 2:
+            self.train_files, self.valid_files = splited_sets
+        elif len(splited_sets) == 3:
+            self.train_files, self.valid_files, self.test_files = splited_sets
 
     def train_dataloader(self):
         train_split = XJ3SegmentDataset(self.train_files, self.data_root, self.image_folder, self.mask_folder,
