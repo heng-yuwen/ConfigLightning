@@ -44,7 +44,7 @@ class SemanticSegmentor(pl.LightningModule):
         epoch_confmat = self.train_confmat.compute()
         self.train_confmat.reset()
         accuracy = self.segment_evaluator(epoch_confmat)
-        self.log("epoch_train_acc", accuracy, prog_bar=True)
+        self.log("ep_train_acc", accuracy, prog_bar=True)
 
     def validation_step(self, batch, batch_idx):
         # this is the validation loop
@@ -63,7 +63,7 @@ class SemanticSegmentor(pl.LightningModule):
         epoch_confmat = self.valid_confmat.compute()
         self.valid_confmat.reset()
         accuracy = self.segment_evaluator(epoch_confmat)
-        self.log("epoch_valid_acc", accuracy, prog_bar=True)
+        self.log("ep_valid_acc", accuracy, prog_bar=True)
 
     def test_step(self, batch, batch_idx):
         # this is the test loop
@@ -82,7 +82,7 @@ class SemanticSegmentor(pl.LightningModule):
         epoch_confmat = self.test_confmat.compute()
         self.test_confmat.reset()
         accuracy = self.segment_evaluator(epoch_confmat)
-        self.log("epoch_test_acc", accuracy, prog_bar=True)
+        self.log("ep_test_acc", accuracy, prog_bar=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)

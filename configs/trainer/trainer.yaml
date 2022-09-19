@@ -7,16 +7,16 @@ trainer:
   callbacks:
     - class_path: pytorch_lightning.callbacks.ModelCheckpoint
       init_args:
-        filename: epoch={epoch}-epoch_valid_acc={epoch_valid_acc}
-        monitor: epoch_valid_acc
-        verbose: true
+        filename: epoch={epoch}-epoch_valid_acc={ep_valid_acc}
+        monitor: ep_valid_acc
+        verbose: false
         save_last: true
         save_top_k: 3
         mode: max
         auto_insert_metric_name: false
         every_n_epochs: 1
         save_on_train_epoch_end: false
-  default_root_dir: null
+  default_root_dir: ./xj3segment_logs
   gradient_clip_val: null
   gradient_clip_algorithm: null
   num_nodes: 1
