@@ -7,7 +7,7 @@ trainer:
   callbacks:
     - class_path: pytorch_lightning.callbacks.ModelCheckpoint
       init_args:
-        filename: epoch={epoch}-epoch_valid_acc={ep_valid_acc}
+        filename: epoch={epoch}-epoch_valid_acc={ep_valid_acc:.5f}
         monitor: ep_valid_acc
         verbose: false
         save_last: true
