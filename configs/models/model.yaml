@@ -7,3 +7,18 @@ model:
     ignore_index: -1
     classes: 48 # one more to cope with the unknown
     is_sparse: true
+  optimizer_dict:
+    betas:
+      - 0.9
+      - 0.999
+    lr: 6.0e-05
+    paramwise_cfg:
+      custom_keys:
+        absolute_pos_embed:
+          decay_mult: 0.0
+        norm:
+          decay_mult: 0.0
+        relative_position_bias_table:
+          decay_mult: 0.0
+    type: AdamW
+    weight_decay: 0.01

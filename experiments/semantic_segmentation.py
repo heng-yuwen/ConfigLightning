@@ -7,7 +7,7 @@ from customise_pl.metrics import SegmentEvaluator
 
 
 class SemanticSegmentor(pl.LightningModule):
-    def __init__(self, parameters: dict):
+    def __init__(self, parameters: dict, optimizer_dict:dict):
         super().__init__()
         ignore_index = parameters.pop("ignore_index")
         num_class = parameters["classes"]
@@ -18,6 +18,8 @@ class SemanticSegmentor(pl.LightningModule):
         self.valid_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
         self.test_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
         self.segment_evaluator = SegmentEvaluator(is_sparse=is_sparse)
+
+        self.optimizer_dict = optimizer_dict
 
     def forward(self, data):
         # in lightning,
@@ -69,21 +71,21 @@ class SemanticSegmentor(pl.LightningModule):
         return {'loss': test_loss, 'preds': preds, 'target': target}
 
     def test_step_end(self, outputs):
-        step_confmat = self.test_confmat(outputs["preds"], outputs["target"])
-        accuracy, acc_per_cls, mean_acc, iou_per_cls, miou = self.segment_evaluator(step_confmat)
+        self.test_confmat(outputs["preds"], outputs["target"])
+        # no need to print during testing
+        # accuracy, acc_per_cls, mean_acc, iou_per_cls, miou = self.segment_evaluator(step_confmat, log_func=self.log, pre_fix="test")
         self.log("test_loss", outputs["loss"])
-        self.log("test_acc", accuracy, prog_bar=True)
-        self.log("test_mean_acc", mean_acc, prog_bar=True)
-        self.log("test_miou", miou, prog_bar=True)
+        # self.log("test_acc", accuracy, prog_bar=True)
+        # self.log("test_mean_acc", mean_acc, prog_bar=True)
+        # self.log("test_miou", miou, prog_bar=True)
 
     def on_test_epoch_end(self):
         epoch_confmat = self.test_confmat.compute()
         self.test_confmat.reset()
-        accuracy, acc_per_cls, mean_acc, iou_per_cls, miou = self.segment_evaluator(epoch_confmat)
-        self.log("ep_test_acc", accuracy, prog_bar=True)
-        self.log("ep_test_mean_acc", mean_acc, prog_bar=True)
-        self.log("ep_test_miou", miou, prog_bar=True)
+        accuracy, acc_per_cls, mean_acc, iou_per_cls, miou = self.segment_evaluator(epoch_confmat, log_func=None)
+        # TODO: prtty print per-class analysis, use a table or something, support latex table format.
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        from mmcv.runner import build_optimizer
+        optimizer = build_optimizer(model=self.model, cfg=self.optimizer_dict)
         return optimizer
