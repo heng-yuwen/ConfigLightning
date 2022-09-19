@@ -13,7 +13,7 @@ class SegmentEvaluator:
     def __init__(self, is_sparse=False):
         self.is_sparse = is_sparse
 
-    def __call__(self, confmat):
+    def __call__(self, confmat, log_func, pre_fix="train"):
         if self.is_sparse:
             true_confmat = confmat[:-1, :-1]
         else:
@@ -35,5 +35,9 @@ class SegmentEvaluator:
             iou_per_cls = intersection.float() / union.float()
             iou_per_cls[torch.isinf(iou_per_cls)] = float('nan')
             miou = nanmean(iou_per_cls)
+
+        log_func(pre_fix+"_acc", accuracy.tolist(), prog_bar=True)
+        log_func(pre_fix + "_mean_acc", mean_acc.tolist(), prog_bar=True)
+        log_func(pre_fix + "_miou", miou.tolist(), prog_bar=True)
 
         return accuracy.tolist(), acc_per_cls.tolist(), mean_acc.tolist(), iou_per_cls.tolist(), miou.tolist()
