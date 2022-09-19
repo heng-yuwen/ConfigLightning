@@ -35,15 +35,19 @@ class SemanticSegmentor(pl.LightningModule):
 
     def training_step_end(self, outputs):
         step_confmat = self.train_confmat(outputs["preds"], outputs["target"])
-        accuracy = self.segment_evaluator(step_confmat)
+        accuracy, acc_per_cls, mean_acc, iou_per_cls, miou = self.segment_evaluator(step_confmat)
         self.log("train_loss", outputs["loss"])
         self.log("train_acc", accuracy, prog_bar=True)
+        self.log("train_mean_acc", mean_acc, prog_bar=True)
+        self.log("train_miou", miou, prog_bar=True)
 
     def on_training_epoch_end(self):
         epoch_confmat = self.train_confmat.compute()
         self.train_confmat.reset()
-        accuracy = self.segment_evaluator(epoch_confmat)
+        accuracy, acc_per_cls, mean_acc, iou_per_cls, miou = self.segment_evaluator(epoch_confmat)
         self.log("ep_train_acc", accuracy, prog_bar=True)
+        self.log("ep_train_mean_acc", mean_acc, prog_bar=True)
+        self.log("ep_train_miou", miou, prog_bar=True)
 
     def validation_step(self, batch, batch_idx):
         # this is the validation loop
@@ -54,15 +58,19 @@ class SemanticSegmentor(pl.LightningModule):
 
     def validation_step_end(self, outputs):
         step_confmat = self.valid_confmat(outputs["preds"], outputs["target"])
-        accuracy = self.segment_evaluator(step_confmat)
+        accuracy, acc_per_cls, mean_acc, iou_per_cls, miou = self.segment_evaluator(step_confmat)
         self.log("valid_loss", outputs["loss"])
         self.log("valid_acc", accuracy, prog_bar=True)
+        self.log("valid_mean_acc", mean_acc, prog_bar=True)
+        self.log("valid_miou", miou, prog_bar=True)
 
     def on_validation_epoch_end(self):
         epoch_confmat = self.valid_confmat.compute()
         self.valid_confmat.reset()
-        accuracy = self.segment_evaluator(epoch_confmat)
+        accuracy, acc_per_cls, mean_acc, iou_per_cls, miou = self.segment_evaluator(epoch_confmat)
         self.log("ep_valid_acc", accuracy, prog_bar=True)
+        self.log("ep_valid_mean_acc", mean_acc, prog_bar=True)
+        self.log("ep_valid_miou", miou, prog_bar=True)
 
     def test_step(self, batch, batch_idx):
         # this is the test loop
@@ -73,15 +81,19 @@ class SemanticSegmentor(pl.LightningModule):
 
     def test_step_end(self, outputs):
         step_confmat = self.test_confmat(outputs["preds"], outputs["target"])
-        accuracy = self.segment_evaluator(step_confmat)
+        accuracy, acc_per_cls, mean_acc, iou_per_cls, miou = self.segment_evaluator(step_confmat)
         self.log("test_loss", outputs["loss"])
         self.log("test_acc", accuracy, prog_bar=True)
+        self.log("test_mean_acc", mean_acc, prog_bar=True)
+        self.log("test_miou", miou, prog_bar=True)
 
     def on_test_epoch_end(self):
         epoch_confmat = self.test_confmat.compute()
         self.test_confmat.reset()
-        accuracy = self.segment_evaluator(epoch_confmat)
+        accuracy, acc_per_cls, mean_acc, iou_per_cls, miou = self.segment_evaluator(epoch_confmat)
         self.log("ep_test_acc", accuracy, prog_bar=True)
+        self.log("ep_test_mean_acc", mean_acc, prog_bar=True)
+        self.log("ep_test_miou", miou, prog_bar=True)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
