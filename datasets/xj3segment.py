@@ -3,8 +3,7 @@ import os.path
 from PIL import Image
 from torchvision.transforms import Compose
 from customise_pl.transforms import CommonCompose
-from customise_pl.transforms import segment_transforms
-from torchvision import transforms
+from customise_pl.transforms import init_transforms
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, Dataset, random_split
 from glob import glob
@@ -14,18 +13,12 @@ import torch
 class XJ3SegmentDataModule(LightningDataModule):
     def __init__(self, data_root, image_folder="images", mask_folder="masks", batch_size=4, num_workers=8,
                  pin_memory=True, split_portion=(0.7, 0.15, 0.15),
-                 train_image_transform=(transforms.ToTensor(),
-                                        transforms.Normalize(mean=torch.Tensor([124 / 255., 117 / 255., 104 / 255.]),
-                                                             std=torch.Tensor([1, 1, 1]))),
-                 train_common_transform=(segment_transforms.SegmentCenterCrop((1280, 720)),
-                                         segment_transforms.SegmentRandomHorizontalFlip()),
+                 train_image_transform=None,
+                 train_common_transform=None,
                  valid_image_transform=None,
                  valid_common_transfor=None,
-                 test_image_transform=(transforms.ToTensor(),
-                                       transforms.Normalize(mean=torch.Tensor([124 / 255., 117 / 255., 104 / 255.]),
-                                                            std=torch.Tensor([1, 1, 1]))),
-                 test_common_transform=(segment_transforms.SegmentCenterCrop((1280, 720)),
-                                        segment_transforms.SegmentRandomHorizontalFlip())):
+                 test_image_transform=None,
+                 test_common_transform=None):
         super().__init__()
         self.train_files = None
         self.test_files = None
@@ -40,15 +33,15 @@ class XJ3SegmentDataModule(LightningDataModule):
         self.num_workers = num_workers
         self.pin_memory = pin_memory
         self.split_portion = split_portion
-        self.train_image_transform = Compose(train_image_transform)
-        self.train_common_transform = CommonCompose(train_common_transform)
-        self.test_image_transform = Compose(test_image_transform)
-        self.test_common_transform = CommonCompose(test_common_transform)
+        self.train_image_transform = Compose(init_transforms(train_image_transform))
+        self.train_common_transform = CommonCompose(init_transforms(train_common_transform))
+        self.test_image_transform = Compose(init_transforms(test_image_transform))
+        self.test_common_transform = CommonCompose(init_transforms(test_common_transform))
 
         if valid_image_transform is None:
-            self.valid_image_transform = Compose(test_image_transform)
+            self.valid_image_transform = Compose(init_transforms(test_image_transform))
         if valid_common_transfor is None:
-            self.valid_common_transfor = CommonCompose(test_common_transform)
+            self.valid_common_transform = CommonCompose(init_transforms(test_common_transform))
 
     def prepare_data(self):
         # download, split, etc...
@@ -76,7 +69,7 @@ class XJ3SegmentDataModule(LightningDataModule):
     def val_dataloader(self):
         val_split = XJ3SegmentDataset(self.valid_files, self.data_root, self.image_folder, self.mask_folder,
                                       image_transform=self.valid_image_transform,
-                                      common_transform=self.valid_common_transfor)
+                                      common_transform=self.valid_common_transform)
         return DataLoader(val_split, batch_size=self.batch_size, num_workers=self.num_workers,
                           pin_memory=self.pin_memory)
 

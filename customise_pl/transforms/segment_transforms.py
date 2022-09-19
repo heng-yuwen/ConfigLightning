@@ -1,7 +1,9 @@
 import pytorch_lightning as pl
+import torch
 from torchvision import transforms
 import torchvision.transforms.functional as F
 import random
+import numpy as np
 
 
 class SegmentRandomHorizontalFlip(pl.LightningModule):
@@ -51,5 +53,18 @@ class SegmentRandomCrop(pl.LightningModule):
         i, j, h, w = transforms.RandomCrop.get_parameter(image, self.size)
         image = F.crop(image, i, j, h, w)
         mask = F.crop(mask, i, j, h, w)
+
+        return image, mask
+
+
+class SegmentToTensor(pl.LightningModule):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, image, mask):
+        default_float_dtype = torch.get_default_dtype()
+        mask = torch.from_numpy(np.array(mask, np.uint8, copy=True))
+        if isinstance(mask, torch.ByteTensor):
+            mask = mask.to(dtype=default_float_dtype)
 
         return image, mask
