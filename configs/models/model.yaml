@@ -6,3 +6,4 @@ model:
     in_channels: 3
     ignore_index: -1
     classes: 48 # one more to cope with the unknown
+    is_sparse: true

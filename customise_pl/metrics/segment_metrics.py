@@ -1,24 +1,20 @@
 import torch
-from torchmetrics import Metric
 
 
-class ConfusionMatrix(Metric):
-    def __init__(self):
-        super().__init__()
-        # call `self.add_state`for every internal state that is needed for the metrics computations
-        # dist_reduce_fx indicates the function that should be used to reduce
-        # state from multiple processes
-        self.add_state("correct", default=torch.tensor(0), dist_reduce_fx="sum")
-        self.add_state("total", default=torch.tensor(0), dist_reduce_fx="sum")
+class SegmentEvaluator:
+    def __init__(self, is_sparse=False):
+        self.is_sparse = is_sparse
 
-    def update(self, preds: torch.Tensor, target: torch.Tensor):
-        # update metric states
-        preds, target = self._input_format(preds, target)
-        assert preds.shape == target.shape
+    def __call__(self, confmat):
+        if self.is_sparse:
+            true_confmat = confmat[:-1, :-1]
+        else:
+            true_confmat = confmat
 
-        self.correct += torch.sum(preds == target)
-        self.total += target.numel()
+        # calculate pixel accuracy
+        with torch.no_grad():
+            correct = torch.diag(true_confmat).sum().item()
+            total = true_confmat.sum().item()
 
-    def compute(self):
-        # compute final result
-        return self.correct.float() / self.total
+        accuracy = correct / total
+        return accuracy
