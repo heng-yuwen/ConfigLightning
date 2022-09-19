@@ -41,7 +41,7 @@ trainer:
   limit_val_batches: null
   limit_test_batches: null
   limit_predict_batches: null
-  val_check_interval: 1
+  val_check_interval: null
   log_every_n_steps: 50
   accelerator: gpu
   strategy: null

@@ -70,3 +70,15 @@ class SegmentToTensor(pl.LightningModule):
             elif default_float_dtype == "torch.float16":
                 mask = mask.to(dtype="torch.int8")
         return image, mask
+
+
+class SegmentResize(pl.LightningModule):
+    def __init__(self, size):
+        super().__init__()
+        self.size = size
+
+    def forward(self, image, mask):
+        image = F.resize(image, self.size, interpolation=transforms.InterpolationMode.BILINEAR)
+        mask = F.resize(mask, self.size, interpolation=transforms.InterpolationMode.NEAREST)
+
+        return image, mask
