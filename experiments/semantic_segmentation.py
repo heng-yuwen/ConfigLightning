@@ -9,11 +9,13 @@ import torchmetrics
 class SemanticSegmentor(pl.LightningModule):
     def __init__(self, parameters: dict):
         super().__init__()
-        self.loss = losses.FocalLoss("multiclass", ignore_index=parameters.pop("ignore_index"))
+        ignore_index = parameters.pop("ignore_index")
+        num_class = parameters["classes"]
+        self.loss = losses.FocalLoss("multiclass", ignore_index=ignore_index)
         self.model = models.get_models(**parameters)
-        self.train_acc = torchmetrics.Accuracy()
-        self.valid_acc = torchmetrics.Accuracy()
-        self.test_acc = torchmetrics.Accuracy()
+        self.train_confmat = torchmetrics.ConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
+        self.valid_confmat = torchmetrics.ConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
+        self.test_confmat = torchmetrics.ConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
 
     def forward(self, data):
         # in lightning,
@@ -30,9 +32,9 @@ class SemanticSegmentor(pl.LightningModule):
         return {'loss': loss, 'preds': preds, 'target': target}
 
     def training_step_end(self, outputs):
-        self.train_acc(outputs["preds"], outputs["target"])
+        self.train_confmat(outputs["preds"], outputs["target"])
         self.log("train_loss", outputs["loss"])
-        self.log("train_acc", self.train_acc)
+        # self.log("train_acc", self.train_confmat)
 
     def validation_step(self, batch, batch_idx):
         # this is the validation loop
@@ -42,9 +44,9 @@ class SemanticSegmentor(pl.LightningModule):
         return {'loss': valid_loss, 'preds': preds, 'target': target}
 
     def validation_step_end(self, outputs):
-        self.valid_acc(outputs["preds"], outputs["target"])
+        self.valid_confmat(outputs["preds"], outputs["target"])
         self.log("valid_loss", outputs["loss"])
-        self.log("valid_acc", self.valid_acc)
+        # self.log("valid_acc", self.valid_acc)
 
     def test_step(self, batch, batch_idx):
         # this is the test loop
@@ -54,9 +56,9 @@ class SemanticSegmentor(pl.LightningModule):
         return {'loss': test_loss, 'preds': preds, 'target': target}
 
     def test_step_end(self, outputs):
-        self.test_acc(outputs["preds"], outputs["target"])
+        self.test_confmat(outputs["preds"], outputs["target"])
         self.log("test_loss", outputs["loss"])
-        self.log("test_acc", self.test_loss)
+        # self.log("test_acc", self.test_loss)
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)

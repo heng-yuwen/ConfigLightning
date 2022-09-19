@@ -26,7 +26,7 @@ data:
       init_args:
         size:
           - 1280
-          - 720
+          - 768
     - class_path: SegmentRandomHorizontalFlip
     - class_path: SegmentToTensor
 
@@ -47,6 +47,6 @@ data:
       init_args:
         size:
           - 1280
-          - 720
+          - 768
     - class_path: SegmentRandomHorizontalFlip
     - class_path: SegmentToTensor

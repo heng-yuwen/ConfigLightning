@@ -4,5 +4,5 @@ model:
     encoder_weights: imagenet
     decoder_name: Unet
     in_channels: 3
-    ignore_index: 255
-    classes: 13 # one more to cope with the unknown
+    ignore_index: -1
+    classes: 48 # one more to cope with the unknown

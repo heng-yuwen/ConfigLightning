@@ -63,8 +63,10 @@ class SegmentToTensor(pl.LightningModule):
 
     def forward(self, image, mask):
         default_float_dtype = torch.get_default_dtype()
-        mask = torch.from_numpy(np.array(mask, np.uint8, copy=True))
+        mask = torch.from_numpy(np.array(mask, np.int16, copy=True))
         if isinstance(mask, torch.ByteTensor):
-            mask = mask.to(dtype=default_float_dtype)
-
+            if default_float_dtype == "torch.float32":
+                mask = mask.to(dtype="torch.int32")
+            elif default_float_dtype == "torch.float16":
+                mask = mask.to(dtype="torch.int8")
         return image, mask
