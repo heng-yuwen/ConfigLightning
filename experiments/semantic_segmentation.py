@@ -13,9 +13,9 @@ class SemanticSegmentor(pl.LightningModule):
         num_class = parameters["classes"]
         self.loss = losses.FocalLoss("multiclass", ignore_index=ignore_index)
         self.model = models.get_models(**parameters)
-        self.train_confmat = torchmetrics.ConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
-        self.valid_confmat = torchmetrics.ConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
-        self.test_confmat = torchmetrics.ConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
+        self.train_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
+        self.valid_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
+        self.test_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
 
     def forward(self, data):
         # in lightning,
