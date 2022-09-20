@@ -5,6 +5,7 @@ data:
   batch_size: 2
   num_workers: 8
   pin_memory: true
+  subset_portion: 0.3 # how much data to use
   split_portion:
   - 0.7
   - 0.15

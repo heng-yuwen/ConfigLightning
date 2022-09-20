@@ -12,7 +12,7 @@ import torch
 
 class XJ3SegmentDataModule(LightningDataModule):
     def __init__(self, data_root, image_folder="images", mask_folder="masks", batch_size=4, num_workers=8,
-                 pin_memory=True, split_portion=(0.7, 0.15, 0.15),
+                 pin_memory=True, split_portion=(0.7, 0.15, 0.15), subset_portion=1,
                  train_image_transform=None,
                  train_common_transform=None,
                  valid_image_transform=None,
@@ -37,6 +37,7 @@ class XJ3SegmentDataModule(LightningDataModule):
         self.train_common_transform = CommonCompose(init_transforms(train_common_transform))
         self.test_image_transform = Compose(init_transforms(test_image_transform))
         self.test_common_transform = CommonCompose(init_transforms(test_common_transform))
+        self.subset_portion = subset_portion
 
         if valid_image_transform is None:
             self.valid_image_transform = Compose(init_transforms(test_image_transform))
@@ -54,6 +55,7 @@ class XJ3SegmentDataModule(LightningDataModule):
         self.image_path = os.path.join(self.data_root, self.image_folder)
         self.mask_path = os.path.join(self.data_root, self.mask_folder)
         files_all = [os.path.basename(file)[:-4] for file in glob(os.path.join(self.image_path, "*.jpg"))]
+        files_all = files_all[: int(len(files_all) * self.subset_portion)]
         self.split_portion = [int(len(files_all) * portion) for portion in self.split_portion]
         self.split_portion[-1] += len(files_all) - sum(self.split_portion)
         splitted_sets = random_split(files_all, self.split_portion,

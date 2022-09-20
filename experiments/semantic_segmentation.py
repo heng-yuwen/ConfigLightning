@@ -88,4 +88,5 @@ class SemanticSegmentor(pl.LightningModule):
     def configure_optimizers(self):
         from mmcv.runner import build_optimizer
         optimizer = build_optimizer(model=self.model, cfg=self.optimizer_dict)
+        # TODO: support scheduler
         return optimizer
