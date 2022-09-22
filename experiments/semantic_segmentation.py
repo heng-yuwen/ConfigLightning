@@ -3,7 +3,7 @@ import segmentation_models_pytorch.losses as losses
 import models
 import torch
 import torchmetrics
-from customise_pl.metrics import SegmentEvaluator
+from customise_pl.metrics import SegmentEvaluator, pretty_print
 
 
 class SemanticSegmentor(pl.LightningModule):
@@ -84,6 +84,14 @@ class SemanticSegmentor(pl.LightningModule):
         self.test_confmat.reset()
         accuracy, acc_per_cls, mean_acc, iou_per_cls, miou = self.segment_evaluator(epoch_confmat, log_func=None)
         # TODO: prtty print per-class analysis, use a table or something, support latex table format.
+        CLASSES = self.trainer.test_dataloaders[0].dataset.CLASSES
+        assert len(iou_per_cls) == len(acc_per_cls) >= len(CLASSES), \
+            "The number of classes does not match the evaluation, densely nor sparsely"
+        if len(acc_per_cls) > len(CLASSES):
+            is_sparse = True
+        else:
+            is_sparse = False
+        pretty_print(CLASSES, accuracy, acc_per_cls, mean_acc, iou_per_cls, miou, is_sparse, self.log)
 
     def configure_optimizers(self):
         from mmcv.runner import build_optimizer

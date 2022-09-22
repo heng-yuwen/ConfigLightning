@@ -1,5 +1,5 @@
 # pytorch_lightning==1.7.6
-seed_everything: true
+seed_everything: 123121313
 ckpt_path: null
 trainer:
   logger: true

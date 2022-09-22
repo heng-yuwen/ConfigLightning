@@ -59,7 +59,7 @@ class XJ3SegmentDataModule(LightningDataModule):
         self.split_portion = [int(len(files_all) * portion) for portion in self.split_portion]
         self.split_portion[-1] += len(files_all) - sum(self.split_portion)
         splitted_sets = random_split(files_all, self.split_portion,
-                                    generator=torch.Generator().manual_seed(42))
+                                     generator=torch.Generator().manual_seed(42))
         if len(splitted_sets) == 2:
             self.train_files, self.valid_files = splitted_sets
         elif len(splitted_sets) == 3:
@@ -86,20 +86,55 @@ class XJ3SegmentDataModule(LightningDataModule):
         return DataLoader(test_split, batch_size=self.batch_size, num_workers=self.num_workers,
                           pin_memory=self.pin_memory)
 
-    def teardown(self):
+    def teardown(self, stage):
         # clean up after fit or test
         # called on every process in DDP
         pass
 
 
 class XJ3SegmentDataset(Dataset):
-    CLASSES = ["车道线-鱼骨线",
-               "车道线-普通车道线",
-               "车道线-横向斑马线",
-               "车道线-单线停止线",
-               "车道线-停车让行线",
-               "车道线-虚减速让行线",
-               "车道线-分段停止线",
+    CLASSES = ["车道线-鱼骨线_清晰_未遮挡",
+               "车道线-鱼骨线_清晰_被遮挡",
+               "车道线-鱼骨线_清晰_树荫遮挡",
+               "车道线-鱼骨线_磨损_未遮挡",
+               "车道线-鱼骨线_磨损_被遮挡",
+               "车道线-鱼骨线_磨损_树荫遮挡",
+               "车道线-普通车道线_清晰_未遮挡",
+               "车道线-普通车道线_清晰_被遮挡",
+               "车道线-普通车道线_清晰_树荫遮挡",
+               "车道线-普通车道线_磨损_未遮挡",
+               "车道线-普通车道线_磨损_被遮挡",
+               "车道线-普通车道线_磨损_树荫遮挡",
+               "车道线-横向斑马线_清晰_未遮挡",
+               "车道线-横向斑马线_清晰_被遮挡",
+               "车道线-横向斑马线_清晰_树荫遮挡",
+               "车道线-横向斑马线_磨损_未遮挡",
+               "车道线-横向斑马线_磨损_被遮挡",
+               "车道线-横向斑马线_磨损_树荫遮挡",
+               "车道线-单线停止线_清晰_未遮挡",
+               "车道线-单线停止线_清晰_被遮挡",
+               "车道线-单线停止线_清晰_树荫遮挡",
+               "车道线-单线停止线_磨损_未遮挡",
+               "车道线-单线停止线_磨损_被遮挡",
+               "车道线-单线停止线_磨损_树荫遮挡",
+               "车道线-停车让行线_清晰_未遮挡",
+               "车道线-停车让行线_清晰_被遮挡",
+               "车道线-停车让行线_清晰_树荫遮挡",
+               "车道线-停车让行线_磨损_未遮挡",
+               "车道线-停车让行线_磨损_被遮挡",
+               "车道线-停车让行线_磨损_树荫遮挡",
+               "车道线-虚减速让行线_清晰_未遮挡",
+               "车道线-虚减速让行线_清晰_被遮挡",
+               "车道线-虚减速让行线_清晰_树荫遮挡",
+               "车道线-虚减速让行线_磨损_未遮挡",
+               "车道线-虚减速让行线_磨损_被遮挡",
+               "车道线-虚减速让行线_磨损_树荫遮挡",
+               "车道线-分段停止线_清晰_未遮挡",
+               "车道线-分段停止线_清晰_被遮挡",
+               "车道线-分段停止线_清晰_树荫遮挡",
+               "车道线-分段停止线_磨损_未遮挡",
+               "车道线-分段停止线_磨损_被遮挡",
+               "车道线-分段停止线_磨损_树荫遮挡",
                "路沿-凸起马路牙子",
                "路沿-交通警戒标识",
                "路沿-道路围栏",

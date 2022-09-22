@@ -1,4 +1,19 @@
 import torch
+import math
+
+
+def pretty_print(CLASSES, accuracy, acc_per_cls, mean_acc, iou_per_cls, miou, is_sparse=False, log_func=None):
+    if log_func is None:
+        pass
+    num_classes = len(CLASSES)
+    for i in range(num_classes):
+        log_func(CLASSES[i] + "_acc", acc_per_cls[i])
+    for i in range(num_classes):
+        log_func(CLASSES[i] + "_iou", iou_per_cls[i])
+
+    log_func("Pixel Acc", accuracy)
+    log_func("Mean Acc", mean_acc)
+    log_func("mIoU", miou)
 
 
 def nanmean(v, *args, inplace=True, **kwargs):
@@ -37,7 +52,7 @@ class SegmentEvaluator:
             miou = nanmean(iou_per_cls)
 
         if log_func is not None:
-            log_func(pre_fix+"_acc", accuracy.tolist(), prog_bar=True)
+            log_func(pre_fix + "_acc", accuracy.tolist(), prog_bar=True)
             log_func(pre_fix + "_mean_acc", mean_acc.tolist(), prog_bar=True)
             log_func(pre_fix + "_miou", miou.tolist(), prog_bar=True)
 
