@@ -1,0 +1,63 @@
+data:
+  data_root: ./xj3segment
+  image_folder: images
+  mask_folder: masks
+  batch_size: 2
+  num_workers: 8
+  pin_memory: true
+  subset_portion: 0.3 # how much data to use
+  split_portion:
+  - 0.7
+  - 0.15
+  - 0.15
+  train_image_transform:
+    - class_path: ToTensor
+    - class_path: Normalize
+      init_args:
+        mean:
+          - 0.48627450980392156
+          - 0.4588235294117647
+          - 0.40784313725490196
+        std:
+          - 1
+          - 1
+          - 1
+  train_common_transform:
+    - class_path: SegmentResize
+      init_args:
+        size:
+          - 640
+          - 384
+    - class_path: SegmentCenterCrop
+      init_args:
+        size:
+          - 640
+          - 384
+    - class_path: SegmentRandomHorizontalFlip
+    - class_path: SegmentToTensor
+
+  test_image_transform:
+    - class_path: ToTensor
+    - class_path: Normalize
+      init_args:
+        mean:
+          - 0.48627450980392156
+          - 0.4588235294117647
+          - 0.40784313725490196
+        std:
+          - 1
+          - 1
+          - 1
+  test_common_transform:
+    - class_path: SegmentResize
+      init_args:
+        size:
+          - 640
+          - 384
+    - class_path: SegmentCenterCrop
+      init_args:
+        size:
+          - 640
+          - 384
+    - class_path: SegmentRandomHorizontalFlip
+    - class_path: SegmentToTensor

@@ -1,27 +1,25 @@
+"""
+This experiment implements the method to recover hyper-spectral images from rgb images.
+Models are taken from  MST-plus-plus
+https://github.com/caiyuanhao1998/MST-plus-plus
+"""
+
 import pytorch_lightning as pl
-import segmentation_models_pytorch.losses as losses
-import segmentation_models
+import spectral_recovery_models
 import torchmetrics
+from customise_pl.losses import Loss_MRAE, Loss_RMSE, Loss_PSNR
 from customise_pl.metrics import SegmentEvaluator, pretty_print
 from customise_pl.schedulers import build_scheduler
 
 
-class SemanticSegmentor(pl.LightningModule):
+class SpectralRecovery(pl.LightningModule):
     def __init__(self, parameters: dict, optimizer_dict: dict, scheduler_dict: dict):
         super().__init__()
-        ignore_index = parameters.pop("ignore_index")
-        num_class = parameters["classes"]
-        is_sparse = parameters.pop("is_sparse")
         self.automatic_optimization = False
-        self.loss = losses.FocalLoss("multiclass", ignore_index=ignore_index)
-        self.model = segmentation_models.get_models(**parameters)
-        self.train_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class,
-                                                                                   ignore_index=ignore_index)
-        self.valid_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class,
-                                                                                   ignore_index=ignore_index)
-        self.test_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class,
-                                                                                  ignore_index=ignore_index)
-        self.segment_evaluator = SegmentEvaluator(is_sparse=is_sparse)
+        self.criterion_mrae = Loss_MRAE()
+        self.criterion_rmse = Loss_RMSE()
+        self.criterion_psnr = Loss_PSNR()
+        self.model = spectral_recovery_models.get_models(**parameters)
 
         self.optimizer_dict = optimizer_dict
         self.scheduler_dict = scheduler_dict
@@ -122,3 +120,4 @@ class SemanticSegmentor(pl.LightningModule):
         optimizer = build_optimizer(model=self.model, cfg=self.optimizer_dict)
         scheduler = build_scheduler(optimizer=optimizer, cfg=self.scheduler_dict, num_epochs=self.trainer.max_epochs)
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
+
