@@ -16,7 +16,7 @@ class XJ3SegmentDataModule(LightningDataModule):
                  train_image_transform=None,
                  train_common_transform=None,
                  valid_image_transform=None,
-                 valid_common_transfor=None,
+                 valid_common_transform=None,
                  test_image_transform=None,
                  test_common_transform=None):
         super().__init__()
@@ -41,8 +41,12 @@ class XJ3SegmentDataModule(LightningDataModule):
 
         if valid_image_transform is None:
             self.valid_image_transform = Compose(init_transforms(test_image_transform))
-        if valid_common_transfor is None:
+        else:
+            self.valid_image_transform = Compose(init_transforms(valid_image_transform))
+        if valid_common_transform is None:
             self.valid_common_transform = CommonCompose(init_transforms(test_common_transform))
+        else:
+            self.valid_common_transform = CommonCompose(init_transforms(valid_common_transform))
 
     def prepare_data(self):
         # download, split, etc...
