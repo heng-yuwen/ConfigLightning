@@ -1,25 +1,30 @@
 import pytorch_lightning as pl
 import segmentation_models_pytorch.losses as losses
 import models
-import torch
 import torchmetrics
 from customise_pl.metrics import SegmentEvaluator, pretty_print
+from customise_pl.schedulers import build_scheduler
 
 
 class SemanticSegmentor(pl.LightningModule):
-    def __init__(self, parameters: dict, optimizer_dict:dict):
+    def __init__(self, parameters: dict, optimizer_dict: dict, scheduler_dict: dict):
         super().__init__()
         ignore_index = parameters.pop("ignore_index")
         num_class = parameters["classes"]
         is_sparse = parameters.pop("is_sparse")
+        self.automatic_optimization = False
         self.loss = losses.FocalLoss("multiclass", ignore_index=ignore_index)
         self.model = models.get_models(**parameters)
-        self.train_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
-        self.valid_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
-        self.test_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class, ignore_index=ignore_index)
+        self.train_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class,
+                                                                                   ignore_index=ignore_index)
+        self.valid_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class,
+                                                                                   ignore_index=ignore_index)
+        self.test_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class,
+                                                                                  ignore_index=ignore_index)
         self.segment_evaluator = SegmentEvaluator(is_sparse=is_sparse)
 
         self.optimizer_dict = optimizer_dict
+        self.scheduler_dict = scheduler_dict
 
     def forward(self, data):
         # in lightning,
@@ -33,12 +38,31 @@ class SemanticSegmentor(pl.LightningModule):
         preds = self.model(data)
         loss = self.loss(preds, target)
 
+        # train
+        opt = self.optimizers()
+        opt.zero_grad()
+        self.manual_backward(loss)
+        opt.step()
+        # scheduler
+        scheduler = self.lr_schedulers()
+        if scheduler._decide_stage() == 0:
+            self.lr_scheduler_step(scheduler, 0, self.trainer.current_epoch)
+
         return {'loss': loss, 'preds': preds, 'target': target}
+
+    def lr_scheduler_step(self, scheduler, optimizer_idx, metric):
+        if metric is None:
+            scheduler.step()
+        else:
+            scheduler.step(metric)
 
     def training_step_end(self, outputs):
         step_confmat = self.train_confmat(outputs["preds"], outputs["target"])
         _ = self.segment_evaluator(step_confmat, log_func=self.log, pre_fix="train")
-        self.log("train_loss", outputs["loss"])
+        self.log("train_loss", outputs["loss"], prog_bar=True)
+        # scheduler
+        scheduler = self.lr_schedulers()
+        self.lr_scheduler_step(scheduler, 0, self.trainer.current_epoch)
 
     def on_training_epoch_end(self):
         epoch_confmat = self.train_confmat.compute()
@@ -96,5 +120,5 @@ class SemanticSegmentor(pl.LightningModule):
     def configure_optimizers(self):
         from mmcv.runner import build_optimizer
         optimizer = build_optimizer(model=self.model, cfg=self.optimizer_dict)
-        # TODO: support scheduler
-        return optimizer
+        scheduler = build_scheduler(optimizer=optimizer, cfg=self.scheduler_dict, num_epochs=self.trainer.max_epochs)
+        return {"optimizer": optimizer, "lr_scheduler": scheduler}

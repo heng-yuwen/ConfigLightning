@@ -22,3 +22,8 @@ model:
           decay_mult: 0.0
     type: AdamW
     weight_decay: 0.01
+  scheduler_dict:
+    type: PolyLRScheduler
+    power: 1.0
+    final_lr: 0.0
+    warmup_steps: 1500

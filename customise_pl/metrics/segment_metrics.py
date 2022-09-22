@@ -1,5 +1,4 @@
 import torch
-import math
 
 
 def pretty_print(CLASSES, accuracy, acc_per_cls, mean_acc, iou_per_cls, miou, is_sparse=False, log_func=None):
