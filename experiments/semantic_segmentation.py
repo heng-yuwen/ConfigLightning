@@ -39,13 +39,13 @@ class SemanticSegmentor(pl.LightningModule):
         loss = self.loss(preds, target)
 
         # train
-        opt = self.optimizers()
-        opt.zero_grad()
+        optimizer = self.optimizers()
+        optimizer.zero_grad()
         self.manual_backward(loss)
-        opt.step()
+        optimizer.step()
         # scheduler
         scheduler = self.lr_schedulers()
-        if scheduler._decide_stage() == 0:
+        if scheduler.stage == 0:
             self.lr_scheduler_step(scheduler, 0, self.trainer.current_epoch)
 
         return {'loss': loss, 'preds': preds, 'target': target}
@@ -62,7 +62,8 @@ class SemanticSegmentor(pl.LightningModule):
         self.log("train_loss", outputs["loss"], prog_bar=True)
         # scheduler
         scheduler = self.lr_schedulers()
-        self.lr_scheduler_step(scheduler, 0, self.trainer.current_epoch)
+        if scheduler.stage == 1:
+            self.lr_scheduler_step(scheduler, 0, self.trainer.current_epoch)
 
     def on_training_epoch_end(self):
         epoch_confmat = self.train_confmat.compute()
