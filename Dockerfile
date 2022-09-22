@@ -10,3 +10,6 @@ RUN pip3 install --no-cache mmcv
 
 RUN echo "export PYTHONPATH=${PYTHONPATH}:/root/customise_pl:/root/datasets:/root/experiments:/root/models" > /root/.bahsrc
 
+# modify the evaluation_loop, line 340 to support Chinese character.
+# matrics_encoded = [metric.encode("gbk") for metric in metrics_strs]
+# max_length = int(min(max(len(max(matrics_encoded, key=len)), len(max(headers, key=len)), 25), term_size / 2))
