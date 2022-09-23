@@ -6,12 +6,12 @@ trainer:
   callbacks:
     - class_path: pytorch_lightning.callbacks.ModelCheckpoint
       init_args:
-        filename: epoch={epoch}-epoch_valid_acc={ep_valid_acc:.5f}
-        monitor: ep_valid_acc
+        filename: epoch={epoch}-mean_mrae_loss={mean_mrae_loss:.5f}
+        monitor: mean_mrae_loss
         verbose: false
         save_last: true
         save_top_k: 3
-        mode: max
+        mode: min
         auto_insert_metric_name: false
         every_n_epochs: 1
         save_on_train_epoch_end: false

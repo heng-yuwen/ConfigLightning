@@ -58,7 +58,7 @@ class XJ3SegmentDataModule(LightningDataModule):
         # called on every process in DDP
         self.image_path = os.path.join(self.data_root, self.image_folder)
         self.mask_path = os.path.join(self.data_root, self.mask_folder)
-        files_all = [os.path.basename(file)[:-4] for file in glob(os.path.join(self.image_path, "*.jpg"))]
+        files_all = [os.path.basename(file)[:-4] for file in glob(os.path.join(self.mask_path, "*.png"))]
         files_all = files_all[: int(len(files_all) * self.subset_portion)]
         self.split_portion = [int(len(files_all) * portion) for portion in self.split_portion]
         self.split_portion[-1] += len(files_all) - sum(self.split_portion)

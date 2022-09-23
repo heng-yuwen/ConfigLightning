@@ -78,7 +78,7 @@ class SemanticSegmentor(pl.LightningModule):
         return {'loss': valid_loss, 'preds': preds, 'target': target}
 
     def validation_step_end(self, outputs):
-        self.valid_confmat(outputs["preds"], outputs["target"])
+        self.valid_confmat.update(outputs["preds"], outputs["target"])
         # print nothing during evaluation.
         # _ = self.segment_evaluator(step_confmat, log_func=self.log, pre_fix="valid")
         # self.log("valid_loss", outputs["loss"])
