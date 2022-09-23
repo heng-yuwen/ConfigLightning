@@ -57,20 +57,20 @@ class SpectralRecoveryDataModule(pl.LightningDataModule):
     def train_dataloader(self):
         train_split = ARAD1KDataset(self.train_files, self.data_root, self.train_rgb_folder, self.train_spectral_folder,
                                     image_transform=self.train_transform)
-        return DataLoader(train_split, batch_size=self.batch_size, num_workers=self.num_workers,
-                          pin_memory=self.pin_memory)
+        return DataLoader(train_split, shuffle=True, batch_size=self.batch_size, num_workers=self.num_workers,
+                          pin_memory=self.pin_memory, drop_last=True)
 
     def val_dataloader(self):
         val_split = ARAD1KDataset(self.valid_files, self.data_root, self.valid_rgb_folder, self.valid_spectral_folder,
                                   image_transform=self.valid_transform)
-        return DataLoader(val_split, batch_size=self.batch_size, num_workers=self.num_workers,
-                          pin_memory=self.pin_memory)
+        return DataLoader(val_split, shuffle=True, batch_size=self.batch_size, num_workers=self.num_workers,
+                          pin_memory=self.pin_memory, drop_last=True)
 
     def test_dataloader(self):
         test_split = ARAD1KDataset(self.test_files, self.data_root, self.test_rgb_folder, None,
                                    image_transform=self.test_transform)
-        return DataLoader(test_split, batch_size=self.batch_size, num_workers=self.num_workers,
-                          pin_memory=self.pin_memory)
+        return DataLoader(test_split, shuffle=True, batch_size=self.batch_size, num_workers=self.num_workers,
+                          pin_memory=self.pin_memory, drop_last=True)
 
     def teardown(self, stage):
         # clean up after fit or test

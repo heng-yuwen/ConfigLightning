@@ -90,5 +90,6 @@ class SpectralRecovery(pl.LightningModule):
     def configure_optimizers(self):
         from mmcv.runner import build_optimizer
         optimizer = build_optimizer(model=self.model, cfg=self.optimizer_dict)
-        scheduler = build_scheduler(optimizer=optimizer, cfg=self.scheduler_dict, num_epochs=self.trainer.max_epochs)
+        scheduler = build_scheduler(optimizer=optimizer, cfg=self.scheduler_dict, num_epochs=self.trainer.max_epochs,
+                                    num_training_steps=self.trainer.max_steps)
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
