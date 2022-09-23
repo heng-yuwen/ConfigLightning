@@ -1,15 +1,16 @@
 from torchvision.transforms import *
 from .segment_transforms import *
+from .spectral_recovery_transforms import *
 
 
 class CommonCompose(Compose):
     def __init__(self, transforms):
         super().__init__(transforms)
 
-    def __call__(self, image, mask):
+    def __call__(self, image1, image2):
         for t in self.transforms:
-            image, mask = t(image, mask)
-        return image, mask
+            image1, image2 = t(image1, image2)
+        return image1, image2
 
 
 def init_class(transform):

@@ -12,7 +12,7 @@ from customise_pl.transforms import init_transforms
 from torch.utils.data import DataLoader, Dataset
 
 
-class SpectralRecovery(pl.LightningModule):
+class SpectralRecoveryDataModule(pl.LightningModule):
     def __init__(self, data_root, train_rgb_folder="Train_RGB", train_spectral_folder="Train_spectral",
                  valid_rgb_folder="Valid_RGB", valid_spectral_folder="Valid_spectral", test_rgb_folder="Test_RGB",
                  patch_size=128, batch_size=4,
