@@ -15,7 +15,6 @@ from torch.utils.data import DataLoader, Dataset
 class SpectralRecoveryDataModule(pl.LightningModule):
     def __init__(self, data_root, train_rgb_folder="Train_RGB", train_spectral_folder="Train_spectral",
                  valid_rgb_folder="Valid_RGB", valid_spectral_folder="Valid_spectral", test_rgb_folder="Test_RGB",
-                 patch_size=128, batch_size=4,
                  num_workers=8, pin_memory=True, train_transform=None,
                  valid_transform=None, test_transform=None):
         super().__init__()
@@ -28,8 +27,6 @@ class SpectralRecoveryDataModule(pl.LightningModule):
         self.valid_rgb_folder = valid_rgb_folder
         self.valid_spectral_folder = valid_spectral_folder
         self.test_rgb_folder = test_rgb_folder
-        self.patch_size = patch_size
-        self.batch_size = batch_size
         self.num_workers = num_workers
         self.pin_memory = pin_memory
         self.train_transform = CommonCompose(init_transforms(train_transform))
@@ -92,7 +89,7 @@ class ARAD1KDataset(Dataset):
     def __getitem__(self, index):
         rgb_path = os.path.join(self.data_root, self.rgb_folder, self.image_files[index] + ".jpg")
         spectral_path = os.path.join(self.data_root, self.spectral_folder, self.image_files[index] + ".mat")
-        rgb = Image.open(rgb_path).convert('RGB')
+        rgb = np.array(Image.open(rgb_path).convert('RGB'), dtype="float32")
         with h5py.File(spectral_path, 'r') as mat:
             spectral = np.array(mat['cube'], dtype="float32")
 
