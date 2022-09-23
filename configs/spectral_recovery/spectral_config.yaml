@@ -95,7 +95,9 @@ data:
       - class_path: SpectralNorm
       - class_path: SpectralRandomCrop
         init_args:
-          patch_size: 128
+          patch_size:
+            - 128
+            - 128
       - class_path: SpectralRotateFlip
         init_args:
           p: 0.5
