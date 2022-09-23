@@ -104,7 +104,10 @@ class ARAD1KDataset(Dataset):
         if self.image_transform is not None:
             rgb, spectral = self.image_transform(rgb, spectral)
 
-        return np.ascontiguousarray(rgb), np.ascontiguousarray(spectral) if spectral is not None else None
+        if spectral is not None:
+            return np.ascontiguousarray(rgb), np.ascontiguousarray(spectral)
+        else:
+            return np.ascontiguousarray(rgb)
 
     def __len__(self):
         return len(self.image_files)
