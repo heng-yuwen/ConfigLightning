@@ -1,4 +1,5 @@
 data:
+  class_path: datasets.XJ3SegmentDataModule
   data_root: ./xj3segment
   image_folder: images
   mask_folder: masks
