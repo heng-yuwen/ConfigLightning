@@ -1,6 +1,8 @@
 from .xj3segment import XJ3SegmentDataModule
+from .arad1k import SpectralRecoveryDataModule
 
-__all__ = {"XJ3SegmentDataModule": XJ3SegmentDataModule}
+__all__ = {"XJ3SegmentDataModule": XJ3SegmentDataModule,
+           "SpectralRecoveryDataModule": SpectralRecoveryDataModule}
 
 
 def get_dataset(dataset_name):

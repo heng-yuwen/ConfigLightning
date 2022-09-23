@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 import segmentation_models_pytorch.losses as losses
-import models
+from models import segmentation_models
 import torchmetrics
 from customise_pl.metrics import SegmentEvaluator, pretty_print
 from customise_pl.schedulers import build_scheduler
@@ -14,7 +14,7 @@ class SemanticSegmentor(pl.LightningModule):
         is_sparse = parameters.pop("is_sparse")
         self.automatic_optimization = False
         self.loss = losses.FocalLoss("multiclass", ignore_index=ignore_index)
-        self.model = models.get_models(**parameters)
+        self.model = segmentation_models.get_models(**parameters)
         self.train_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class,
                                                                                    ignore_index=ignore_index)
         self.valid_confmat = torchmetrics.classification.MulticlassConfusionMatrix(num_classes=num_class,
@@ -78,7 +78,7 @@ class SemanticSegmentor(pl.LightningModule):
         return {'loss': valid_loss, 'preds': preds, 'target': target}
 
     def validation_step_end(self, outputs):
-        self.valid_confmat(outputs["preds"], outputs["target"])
+        self.valid_confmat.update(outputs["preds"], outputs["target"])
         # print nothing during evaluation.
         # _ = self.segment_evaluator(step_confmat, log_func=self.log, pre_fix="valid")
         # self.log("valid_loss", outputs["loss"])
@@ -108,7 +108,6 @@ class SemanticSegmentor(pl.LightningModule):
         epoch_confmat = self.test_confmat.compute()
         self.test_confmat.reset()
         accuracy, acc_per_cls, mean_acc, iou_per_cls, miou = self.segment_evaluator(epoch_confmat, log_func=None)
-        # TODO: prtty print per-class analysis, use a table or something, support latex table format.
         CLASSES = self.trainer.test_dataloaders[0].dataset.CLASSES
         assert len(iou_per_cls) == len(acc_per_cls) >= len(CLASSES), \
             "The number of classes does not match the evaluation, densely nor sparsely"
