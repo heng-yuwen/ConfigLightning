@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader, Dataset
 class SpectralRecoveryDataModule(pl.LightningDataModule):
     def __init__(self, data_root, train_rgb_folder="Train_RGB", train_spectral_folder="Train_spectral",
                  valid_rgb_folder="Valid_RGB", valid_spectral_folder="Valid_spectral", test_rgb_folder="Test_RGB",
-                 num_workers=8, pin_memory=True, train_transform=None,
+                 num_workers=8, batch_size=8, pin_memory=True, train_transform=None,
                  valid_transform=None, test_transform=None):
         super().__init__()
         self.test_files = None
@@ -28,6 +28,7 @@ class SpectralRecoveryDataModule(pl.LightningDataModule):
         self.valid_spectral_folder = valid_spectral_folder
         self.test_rgb_folder = test_rgb_folder
         self.num_workers = num_workers
+        self.batch_size = batch_size
         self.pin_memory = pin_memory
         self.train_transform = CommonCompose(init_transforms(train_transform))
         self.test_transform = CommonCompose(init_transforms(test_transform))
@@ -54,20 +55,20 @@ class SpectralRecoveryDataModule(pl.LightningDataModule):
         random.shuffle(self.test_files)
 
     def train_dataloader(self):
-        train_split = ARAD1KDataset(self.train_files, self.data_root, self.image_folder, self.mask_folder,
-                                    image_transform=self.train_image_transform)
+        train_split = ARAD1KDataset(self.train_files, self.data_root, self.train_rgb_folder, self.train_spectral_folder,
+                                    image_transform=self.train_transform)
         return DataLoader(train_split, batch_size=self.batch_size, num_workers=self.num_workers,
                           pin_memory=self.pin_memory)
 
     def val_dataloader(self):
-        val_split = ARAD1KDataset(self.valid_files, self.data_root, self.image_folder, self.mask_folder,
-                                  image_transform=self.valid_image_transform)
+        val_split = ARAD1KDataset(self.valid_files, self.data_root, self.valid_rgb_folder, self.valid_spectral_folder,
+                                  image_transform=self.valid_transform)
         return DataLoader(val_split, batch_size=self.batch_size, num_workers=self.num_workers,
                           pin_memory=self.pin_memory)
 
     def test_dataloader(self):
-        test_split = ARAD1KDataset(self.test_files, self.data_root, self.image_folder, self.mask_folder,
-                                   image_transform=self.test_image_transform)
+        test_split = ARAD1KDataset(self.test_files, self.data_root, self.test_rgb_folder, None,
+                                   image_transform=self.test_transform)
         return DataLoader(test_split, batch_size=self.batch_size, num_workers=self.num_workers,
                           pin_memory=self.pin_memory)
 
@@ -88,16 +89,19 @@ class ARAD1KDataset(Dataset):
 
     def __getitem__(self, index):
         rgb_path = os.path.join(self.data_root, self.rgb_folder, self.image_files[index] + ".jpg")
-        spectral_path = os.path.join(self.data_root, self.spectral_folder, self.image_files[index] + ".mat")
-        rgb = np.array(Image.open(rgb_path).convert('RGB'), dtype="float32")
-        with h5py.File(spectral_path, 'r') as mat:
-            spectral = np.array(mat['cube'], dtype="float32")
-        mat.close()
+        if self.spectral_folder is not None:
+            spectral_path = os.path.join(self.data_root, self.spectral_folder, self.image_files[index] + ".mat")
+            with h5py.File(spectral_path, 'r') as mat:
+                spectral = np.array(mat['cube'], dtype="float32")
+            mat.close()
+        else:
+            spectral = None
 
+        rgb = np.array(Image.open(rgb_path).convert('RGB'), dtype="float32")
         if self.image_transform is not None:
             rgb, spectral = self.image_transform(rgb, spectral)
 
-        return np.ascontiguousarray(rgb), np.ascontiguousarray(spectral)
+        return np.ascontiguousarray(rgb), np.ascontiguousarray(spectral) if spectral is not None else None
 
     def __len__(self):
         return len(self.image_files)

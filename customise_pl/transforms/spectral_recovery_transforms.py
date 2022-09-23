@@ -8,7 +8,7 @@ import numpy as np
 
 class SpectralNorm(pl.LightningModule):
     def __init__(self):
-        super(SpectralNorm, self).__init__()
+        super().__init__()
 
     def forward(self, rgb, spectral):
         rgb = (rgb - rgb.min()) / (rgb.max() - rgb.min())
@@ -42,7 +42,7 @@ class SpectralRotateFlip(pl.LightningModule):
 class SpectralRandomCrop(pl.LightningModule):
     """Use this after the SpectralNorm class forward"""
     def __init__(self, patch_size):
-        super().__init__(self)
+        super().__init__()
         self.patch_size = patch_size
 
     def forward(self, rgb, spectral):
