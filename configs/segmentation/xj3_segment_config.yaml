@@ -1,0 +1,160 @@
+# pytorch_lightning==1.7.6
+seed_everything: 123121313
+ckpt_path: null
+trainer:
+  logger: true
+  enable_checkpointing: true
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+      init_args:
+        filename: epoch={epoch}-epoch_valid_acc={ep_valid_acc:.5f}
+        monitor: ep_valid_acc
+        verbose: false
+        save_last: true
+        save_top_k: 3
+        mode: max
+        auto_insert_metric_name: false
+        every_n_epochs: 1
+        save_on_train_epoch_end: false
+  default_root_dir: ./xj3segment_logs
+  gradient_clip_val: null
+  gradient_clip_algorithm: null
+  num_nodes: 1
+  num_processes: null
+  devices: 1
+  gpus: null
+  auto_select_gpus: true
+  tpu_cores: null
+  ipus: null
+  enable_progress_bar: true
+  overfit_batches: 0.0
+  track_grad_norm: -1
+  check_val_every_n_epoch: 1
+  fast_dev_run: false
+  accumulate_grad_batches: null
+  max_epochs: 200
+  min_epochs: 50
+  max_steps: -1
+  min_steps: null
+  max_time: null
+  limit_train_batches: null
+  limit_val_batches: null
+  limit_test_batches: null
+  limit_predict_batches: null
+  val_check_interval: null
+  log_every_n_steps: 50
+  accelerator: gpu
+  strategy: null
+  sync_batchnorm: false
+  precision: 32
+  enable_model_summary: true
+  weights_save_path: null
+  num_sanity_val_steps: 2
+  resume_from_checkpoint: null
+  profiler: null
+  benchmark: false
+  deterministic: true
+  reload_dataloaders_every_n_epochs: 0
+  auto_lr_find: false
+  replace_sampler_ddp: true
+  detect_anomaly: false
+  auto_scale_batch_size: false
+  plugins: null
+  amp_backend: native
+  amp_level: null
+  move_metrics_to_cpu: false
+  multiple_trainloader_mode: max_size_cycle
+model:
+  class_path: experiments.SemanticSegmentor
+  parameters:
+    encoder_name: resnet34
+    encoder_weights: imagenet
+    decoder_name: Unet
+    in_channels: 3
+    ignore_index: -1
+    classes: 48 # one more to cope with the unknown
+    is_sparse: true
+  optimizer_dict:
+    betas:
+      - 0.9
+      - 0.999
+    lr: 6.0e-05
+    paramwise_cfg:
+      custom_keys:
+        absolute_pos_embed:
+          decay_mult: 0.0
+        norm:
+          decay_mult: 0.0
+        relative_position_bias_table:
+          decay_mult: 0.0
+    type: AdamW
+    weight_decay: 0.01
+  scheduler_dict:
+    type: PolyLRScheduler
+    power: 1.0
+    final_lr: 0.0
+    warmup_steps: 1500
+data:
+  class_path: datasets.XJ3SegmentDataModule
+  data_root: ./xj3segment
+  image_folder: images
+  mask_folder: masks
+  batch_size: 2
+  num_workers: 8
+  pin_memory: true
+  subset_portion: 0.3 # how much data to use
+  split_portion:
+  - 0.7
+  - 0.15
+  - 0.15
+  train_image_transform:
+    - class_path: ToTensor
+    - class_path: Normalize
+      init_args:
+        mean:
+          - 0.48627450980392156
+          - 0.4588235294117647
+          - 0.40784313725490196
+        std:
+          - 1
+          - 1
+          - 1
+  train_common_transform:
+    - class_path: SegmentResize
+      init_args:
+        size:
+          - 640
+          - 384
+    - class_path: SegmentCenterCrop
+      init_args:
+        size:
+          - 640
+          - 384
+    - class_path: SegmentRandomHorizontalFlip
+    - class_path: SegmentToTensor
+
+  test_image_transform:
+    - class_path: ToTensor
+    - class_path: Normalize
+      init_args:
+        mean:
+          - 0.48627450980392156
+          - 0.4588235294117647
+          - 0.40784313725490196
+        std:
+          - 1
+          - 1
+          - 1
+  test_common_transform:
+    - class_path: SegmentResize
+      init_args:
+        size:
+          - 640
+          - 384
+    - class_path: SegmentCenterCrop
+      init_args:
+        size:
+          - 640
+          - 384
+    - class_path: SegmentRandomHorizontalFlip
+    - class_path: SegmentToTensor
