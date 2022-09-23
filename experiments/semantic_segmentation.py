@@ -1,6 +1,6 @@
 import pytorch_lightning as pl
 import segmentation_models_pytorch.losses as losses
-import segmentation_models
+from models import segmentation_models
 import torchmetrics
 from customise_pl.metrics import SegmentEvaluator, pretty_print
 from customise_pl.schedulers import build_scheduler

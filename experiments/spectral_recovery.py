@@ -5,21 +5,20 @@ https://github.com/caiyuanhao1998/MST-plus-plus
 """
 
 import pytorch_lightning as pl
-import spectral_recovery_models
-import torchmetrics
+from models import spectral_recovery_models
 from customise_pl.losses import Loss_MRAE, Loss_RMSE, Loss_PSNR
-from customise_pl.metrics import SegmentEvaluator, pretty_print
+from customise_pl.metrics import pretty_print
 from customise_pl.schedulers import build_scheduler
 
 
 class SpectralRecovery(pl.LightningModule):
-    def __init__(self, parameters: dict, optimizer_dict: dict, scheduler_dict: dict):
+    def __init__(self, method: str, optimizer_dict: dict, scheduler_dict: dict, pretrained_model_path=None, ):
         super().__init__()
         self.automatic_optimization = False
         self.criterion_mrae = Loss_MRAE()
         self.criterion_rmse = Loss_RMSE()
         self.criterion_psnr = Loss_PSNR()
-        self.model = spectral_recovery_models.get_models(**parameters)
+        self.model = spectral_recovery_models.get_models(method, pretrained_model_path=pretrained_model_path)
 
         self.optimizer_dict = optimizer_dict
         self.scheduler_dict = scheduler_dict
@@ -120,4 +119,3 @@ class SpectralRecovery(pl.LightningModule):
         optimizer = build_optimizer(model=self.model, cfg=self.optimizer_dict)
         scheduler = build_scheduler(optimizer=optimizer, cfg=self.scheduler_dict, num_epochs=self.trainer.max_epochs)
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
-

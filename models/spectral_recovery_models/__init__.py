@@ -12,7 +12,7 @@ from .Restormer import Restormer
 from .AWAN import AWAN
 
 
-def get_models(method, pretrained_model_path=None, **kwargs):
+def get_models(method, pretrained_model_path=None):
     if method == 'mirnet':
         model = MIRNet(n_RRG=3, n_MSRB=1, height=3, width=1)
     elif method == 'mst_plus_plus':
