@@ -33,7 +33,7 @@ trainer:
   accumulate_grad_batches: null
   max_epochs: 200
   min_epochs: 50
-  max_steps: 100
+  max_steps: -1
   min_steps: null
   max_time: null
   limit_train_batches: null
@@ -88,9 +88,9 @@ data:
     valid_rgb_folder: Valid_RGB
     valid_spectral_folder: Valid_spectral
     test_rgb_folder: Test_RGB
-    num_workers: 2
-    batch_size: 6
-    pin_memory: true
+    num_workers: 4
+    batch_size: 4
+    pin_memory: false
     train_transform:
       - class_path: SpectralNorm
       - class_path: SpectralRandomCrop

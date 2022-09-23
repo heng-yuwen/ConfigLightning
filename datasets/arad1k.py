@@ -91,9 +91,12 @@ class ARAD1KDataset(Dataset):
         rgb_path = os.path.join(self.data_root, self.rgb_folder, self.image_files[index] + ".jpg")
         if self.spectral_folder is not None:
             spectral_path = os.path.join(self.data_root, self.spectral_folder, self.image_files[index] + ".mat")
-            with h5py.File(spectral_path, 'r') as mat:
-                spectral = np.array(mat['cube'], dtype="float32")
-            mat.close()
+            try:
+                with h5py.File(spectral_path, 'r') as mat:
+                    spectral = np.array(mat['cube'], dtype="float32")
+                mat.close()
+            except:
+                print("here")
         else:
             spectral = None
 
