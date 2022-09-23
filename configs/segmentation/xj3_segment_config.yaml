@@ -66,95 +66,97 @@ trainer:
   multiple_trainloader_mode: max_size_cycle
 model:
   class_path: experiments.SemanticSegmentor
-  parameters:
-    encoder_name: resnet34
-    encoder_weights: imagenet
-    decoder_name: Unet
-    in_channels: 3
-    ignore_index: -1
-    classes: 48 # one more to cope with the unknown
-    is_sparse: true
-  optimizer_dict:
-    betas:
-      - 0.9
-      - 0.999
-    lr: 6.0e-05
-    paramwise_cfg:
-      custom_keys:
-        absolute_pos_embed:
-          decay_mult: 0.0
-        norm:
-          decay_mult: 0.0
-        relative_position_bias_table:
-          decay_mult: 0.0
-    type: AdamW
-    weight_decay: 0.01
-  scheduler_dict:
-    type: PolyLRScheduler
-    power: 1.0
-    final_lr: 0.0
-    warmup_steps: 1500
+  init_args:
+    parameters:
+      encoder_name: resnet34
+      encoder_weights: imagenet
+      decoder_name: Unet
+      in_channels: 3
+      ignore_index: -1
+      classes: 48 # one more to cope with the unknown
+      is_sparse: true
+    optimizer_dict:
+      betas:
+        - 0.9
+        - 0.999
+      lr: 6.0e-05
+      paramwise_cfg:
+        custom_keys:
+          absolute_pos_embed:
+            decay_mult: 0.0
+          norm:
+            decay_mult: 0.0
+          relative_position_bias_table:
+            decay_mult: 0.0
+      type: AdamW
+      weight_decay: 0.01
+    scheduler_dict:
+      type: PolyLRScheduler
+      power: 1.0
+      final_lr: 0.0
+      warmup_steps: 1500
 data:
   class_path: datasets.XJ3SegmentDataModule
-  data_root: ./xj3segment
-  image_folder: images
-  mask_folder: masks
-  batch_size: 2
-  num_workers: 8
-  pin_memory: true
-  subset_portion: 0.3 # how much data to use
-  split_portion:
-  - 0.7
-  - 0.15
-  - 0.15
-  train_image_transform:
-    - class_path: ToTensor
-    - class_path: Normalize
-      init_args:
-        mean:
-          - 0.48627450980392156
-          - 0.4588235294117647
-          - 0.40784313725490196
-        std:
-          - 1
-          - 1
-          - 1
-  train_common_transform:
-    - class_path: SegmentResize
-      init_args:
-        size:
-          - 640
-          - 384
-    - class_path: SegmentCenterCrop
-      init_args:
-        size:
-          - 640
-          - 384
-    - class_path: SegmentRandomHorizontalFlip
-    - class_path: SegmentToTensor
+  init_args:
+    data_root: ./xj3segment
+    image_folder: images
+    mask_folder: masks
+    batch_size: 2
+    num_workers: 8
+    pin_memory: true
+    subset_portion: 0.3 # how much data to use
+    split_portion:
+    - 0.7
+    - 0.15
+    - 0.15
+    train_image_transform:
+      - class_path: ToTensor
+      - class_path: Normalize
+        init_args:
+          mean:
+            - 0.48627450980392156
+            - 0.4588235294117647
+            - 0.40784313725490196
+          std:
+            - 1
+            - 1
+            - 1
+    train_common_transform:
+      - class_path: SegmentResize
+        init_args:
+          size:
+            - 640
+            - 384
+      - class_path: SegmentCenterCrop
+        init_args:
+          size:
+            - 640
+            - 384
+      - class_path: SegmentRandomHorizontalFlip
+      - class_path: SegmentToTensor
 
-  test_image_transform:
-    - class_path: ToTensor
-    - class_path: Normalize
-      init_args:
-        mean:
-          - 0.48627450980392156
-          - 0.4588235294117647
-          - 0.40784313725490196
-        std:
-          - 1
-          - 1
-          - 1
-  test_common_transform:
-    - class_path: SegmentResize
-      init_args:
-        size:
-          - 640
-          - 384
-    - class_path: SegmentCenterCrop
-      init_args:
-        size:
-          - 640
-          - 384
-    - class_path: SegmentRandomHorizontalFlip
-    - class_path: SegmentToTensor
+    test_image_transform:
+      - class_path: ToTensor
+      - class_path: Normalize
+        init_args:
+          mean:
+            - 0.48627450980392156
+            - 0.4588235294117647
+            - 0.40784313725490196
+          std:
+            - 1
+            - 1
+            - 1
+    test_common_transform:
+      - class_path: SegmentResize
+        init_args:
+          size:
+            - 640
+            - 384
+      - class_path: SegmentCenterCrop
+        init_args:
+          size:
+            - 640
+            - 384
+      - class_path: SegmentRandomHorizontalFlip
+      - class_path: SegmentToTensor
