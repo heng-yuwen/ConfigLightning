@@ -46,7 +46,7 @@ class SpectralRandomCrop(pl.LightningModule):
         self.patch_size = patch_size
 
     def forward(self, rgb, spectral):
-        i, j, h, w = transforms.RandomCrop.get_parameter(rgb, self.patch_size)
+        i, j, h, w = transforms.RandomCrop.get_params(torch.tensor(rgb), self.patch_size)
         rgb = rgb[:, i:i + h, j: j+w]
         spectral = spectral[:, i:i + h, j: j+w]
 

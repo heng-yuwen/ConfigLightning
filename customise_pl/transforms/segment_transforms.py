@@ -50,7 +50,7 @@ class SegmentRandomCrop(pl.LightningModule):
         self.size = size
 
     def forward(self, image, mask):
-        i, j, h, w = transforms.RandomCrop.get_parameter(image, self.size)
+        i, j, h, w = transforms.RandomCrop.get_params(image, self.size)
         image = F.crop(image, i, j, h, w)
         mask = F.crop(mask, i, j, h, w)
 
