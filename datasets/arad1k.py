@@ -96,7 +96,7 @@ class ARAD1KDataset(Dataset):
                     spectral = np.array(mat['cube'], dtype="float32")
                 mat.close()
             except:
-                print("here")
+                raise EOFError("{} is corrupted".format(spectral_path))
         else:
             spectral = None
 
