@@ -78,7 +78,7 @@ class SpectralRecoveryDataModule(pl.LightningModule):
 
 
 class ARAD1KDataset(Dataset):
-    def __init__(self, image_files, data_root, rgb_folder="images", spectral_folder="masks", image_transform=None):
+    def __init__(self, image_files, data_root, rgb_folder="Train_RGB", spectral_folder="Train_spectral", image_transform=None):
         super().__init__()
         self.image_files = image_files
         self.data_root = data_root
@@ -92,11 +92,12 @@ class ARAD1KDataset(Dataset):
         rgb = np.array(Image.open(rgb_path).convert('RGB'), dtype="float32")
         with h5py.File(spectral_path, 'r') as mat:
             spectral = np.array(mat['cube'], dtype="float32")
+        mat.close()
 
         if self.image_transform is not None:
             rgb, spectral = self.image_transform(rgb, spectral)
 
-        return rgb, spectral
+        return np.ascontiguousarray(rgb), np.ascontiguousarray(spectral)
 
     def __len__(self):
         return len(self.image_files)
