@@ -31,7 +31,7 @@ trainer:
   check_val_every_n_epoch: 1
   fast_dev_run: false
   accumulate_grad_batches: null
-  max_epochs: 200
+  max_epochs: 400
   min_epochs: 50
   max_steps: -1
   min_steps: null
@@ -78,7 +78,7 @@ model:
       type: CosineAnnealingLR
       by_iteration: true
       eta_min: 1e-6
-    pretrained_model_path: null
+    pretrained_model_path: /media/baidu/8tssd/phd/MST-plus-plus/test_develop_code/model_zoo/mst_plus_plus.pth
 data:
   class_path: datasets.SpectralRecoveryDataModule
   init_args:

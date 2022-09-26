@@ -95,6 +95,8 @@ class ARAD1KDataset(Dataset):
                 with h5py.File(spectral_path, 'r') as mat:
                     spectral = np.array(mat['cube'], dtype="float32")
                 mat.close()
+                if (spectral == 0).any():
+                    print(spectral_path)
             except:
                 raise EOFError("{} is corrupted".format(spectral_path))
         else:
