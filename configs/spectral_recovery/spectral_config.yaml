@@ -78,7 +78,7 @@ model:
       type: CosineAnnealingLR
       by_iteration: true
       eta_min: 1e-6
-    pretrained_model_path: /media/baidu/8tssd/phd/MST-plus-plus/test_develop_code/model_zoo/mst_plus_plus.pth
+    pretrained_model_path: null
 data:
   class_path: datasets.SpectralRecoveryDataModule
   init_args:
