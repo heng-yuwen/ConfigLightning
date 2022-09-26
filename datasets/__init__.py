@@ -1,4 +1,4 @@
-from .xj3segment import XJ3SegmentDataModule
+from .mask_segment import XJ3SegmentDataModule
 from .arad1k import SpectralRecoveryDataModule
 
 __all__ = {"XJ3SegmentDataModule": XJ3SegmentDataModule,

@@ -103,4 +103,3 @@ data:
           p: 0.5
     test_transform:
       - class_path: SpectralNorm
-
