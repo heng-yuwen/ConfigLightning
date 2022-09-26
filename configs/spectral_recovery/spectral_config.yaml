@@ -57,7 +57,7 @@ trainer:
   auto_lr_find: false
   replace_sampler_ddp: true
   detect_anomaly: false
-  auto_scale_batch_size: false
+  auto_scale_batch_size: true
   plugins: null
   amp_backend: native
   amp_level: null
