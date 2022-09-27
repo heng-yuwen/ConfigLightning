@@ -70,23 +70,23 @@ class XJ3SegmentDataModule(LightningDataModule):
             self.train_files, self.valid_files, self.test_files = splitted_sets
 
     def train_dataloader(self):
-        train_split = XJ3SegmentDataset(self.train_files, self.data_root, self.image_folder, self.mask_folder,
-                                        image_transform=self.train_image_transform,
-                                        common_transform=self.train_common_transform)
+        train_split = MaskSegmentDataset(self.train_files, self.data_root, self.image_folder, self.mask_folder,
+                                         image_transform=self.train_image_transform,
+                                         common_transform=self.train_common_transform)
         return DataLoader(train_split, batch_size=self.batch_size, num_workers=self.num_workers,
                           pin_memory=self.pin_memory)
 
     def val_dataloader(self):
-        val_split = XJ3SegmentDataset(self.valid_files, self.data_root, self.image_folder, self.mask_folder,
-                                      image_transform=self.valid_image_transform,
-                                      common_transform=self.valid_common_transform)
+        val_split = MaskSegmentDataset(self.valid_files, self.data_root, self.image_folder, self.mask_folder,
+                                       image_transform=self.valid_image_transform,
+                                       common_transform=self.valid_common_transform)
         return DataLoader(val_split, batch_size=self.batch_size, num_workers=self.num_workers,
                           pin_memory=self.pin_memory)
 
     def test_dataloader(self):
-        test_split = XJ3SegmentDataset(self.test_files, self.data_root, self.image_folder, self.mask_folder,
-                                       image_transform=self.test_image_transform,
-                                       common_transform=self.test_common_transform)
+        test_split = MaskSegmentDataset(self.test_files, self.data_root, self.image_folder, self.mask_folder,
+                                        image_transform=self.test_image_transform,
+                                        common_transform=self.test_common_transform)
         return DataLoader(test_split, batch_size=self.batch_size, num_workers=self.num_workers,
                           pin_memory=self.pin_memory)
 
@@ -96,7 +96,7 @@ class XJ3SegmentDataModule(LightningDataModule):
         pass
 
 
-class XJ3SegmentDataset(Dataset):
+class MaskSegmentDataset(Dataset):
     CLASSES = ["车道线-鱼骨线_清晰_未遮挡",
                "车道线-鱼骨线_清晰_被遮挡",
                "车道线-鱼骨线_清晰_树荫遮挡",
